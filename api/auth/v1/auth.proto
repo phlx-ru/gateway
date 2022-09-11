@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package auth.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/api/field_behavior.proto";
+
+option go_package = "auth/api/auth/v1;v1";
+
+// This API provides methods for users authentication (returns JWT, without cookies)
+service Auth {
+  // Check user and session info by token
+  rpc Check (CheckRequest) returns (CheckResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/check"
+      body: "*"
+    };
+  }
+
+  // Login user by username and password, returns JWT token
+  rpc Login (LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/login"
+      body: "*"
+    };
+  }
+
+  // Login user by username and one-time code (generated with GenerateCode()), returns JWT token
+  rpc LoginByCode (LoginByCodeRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/login_by_code"
+      body: "*"
+    };
+  }
+
+  // Generate ResetPasswordUID and sends it to user
+  rpc ResetPassword (ResetPasswordRequest) returns (AuthNothing) {
+    option (google.api.http) = {
+      post: "/v1/auth/reset_password"
+      body: "*"
+    };
+  }
+
+  // Set new password by resetPasswordUID, which generated and sent to user with ResetPassword()
+  rpc NewPassword (NewPasswordRequest) returns (AuthNothing) {
+    option (google.api.http) = {
+      post: "/v1/auth/new_password"
+      body: "*"
+    };
+  }
+
+  // Set new password by username and old password
+  rpc ChangePassword (ChangePasswordRequest) returns (AuthNothing) {
+    option (google.api.http) = {
+      post: "/v1/auth/change_password"
+      body: "*"
+    };
+  }
+
+  // Generate one-time code for LoginByCode() and sends it to user
+  rpc GenerateCode (GenerateCodeRequest) returns (AuthNothing) {
+    option (google.api.http) = {
+      post: "/v1/auth/generate_code"
+      body: "*"
+    };
+  }
+
+  rpc History (HistoryRequest) returns (HistoryResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/history"
+      body: "*"
+    };
+  }
+}
+
+// Empty response for success signal without data
+message AuthNothing {}
+
+// Request for check auth
+message CheckRequest {
+  // User auth JWT token
+  string token = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message CheckResponse {
+  message User {
+    // User category type
+    string type = 1;
+    // User display name
+    string displayName = 2;
+    // User email
+    optional string email = 3;
+    // User phone
+    optional string phone = 4;
+  }
+  message Session {
+    // Time until which session and token is active
+    google.protobuf.Timestamp until = 1;
+    // Users IP to which session is bound
+    optional string ip = 2;
+    // Users User-Agent header to which session is bound
+    optional string userAgent = 3;
+    // Users DeviceId to which session is bound if login was by mobile device
+    optional string deviceId = 4;
+  }
+  User user = 1;
+  Session session = 2;
+}
+
+message Stats {
+  // Users IP extracted from request
+  string ip = 1;
+  // Users User-Agent extracted from request
+  string userAgent = 2;
+  // Users DeviceId extracted from request if login was by mobile device
+  optional string deviceId = 3;
+}
+
+message LoginRequest {
+  // Users phone (like 9003002020) or email (like user@name.mail)
+  string username = 1;
+  // Users password
+  string password = 2;
+  // Remember session — if true then session interval is 7 days, else 1 day
+  bool remember = 3;
+  // Details of users request (sets if request send from API gateway or API composition service)
+  optional Stats stats = 4;
+}
+
+message LoginResponse {
+  // Bearer API JWT token
+  string token = 1;
+  // Time until which session and token is active
+  google.protobuf.Timestamp until = 2;
+}
+
+message LoginByCodeRequest {
+  // Users phone (like 9003002020) or email (like user@name.mail)
+  string username = 1;
+  // Generated one-time code for login
+  string code = 2;
+  // Remember session — if true then session interval is 7 days, else 1 day
+  bool remember = 3;
+  // Details of users request (sets if request send from API gateway or API composition service)
+  optional Stats stats = 4;
+}
+
+message ResetPasswordRequest {
+  // Users phone (like 9003002020) or email (like user@name.mail)
+  string username = 1;
+  // Details of users request (sets if request send from API gateway or API composition service)
+  optional Stats stats = 2;
+}
+
+message NewPasswordRequest {
+  // Users phone (like 9003002020) or email (like user@name.mail)
+  string username = 1;
+  // Unique identifier for password reset (previously sent with ResetPassword())
+  string passwordResetHash = 2;
+  // New users password
+  string password = 3;
+  // Details of users request (sets if request send from API gateway or API composition service)
+  optional Stats stats = 4;
+}
+
+message ChangePasswordRequest {
+  // Users phone (like 9003002020) or email (like user@name.mail)
+  string username = 1;
+  // Old users password
+  string oldPassword = 2;
+  // New users password
+  string newPassword = 3;
+  // Details of users request (sets if request send from API gateway or API composition service)
+  optional Stats stats = 4;
+}
+
+message GenerateCodeRequest {
+  // Users phone (like 9003002020) or email (like user@name.mail)
+  string username = 1;
+  // Details of users request (sets if request send from API gateway or API composition service)
+  optional Stats stats = 2;
+}
+
+message HistoryRequest {
+  int64 userId = 1;
+  int64 limit = 2;
+  int64 offset = 3;
+}
+
+message HistoryItem {
+  int64 id = 1;
+  google.protobuf.Timestamp when = 2;
+  string event = 3;
+  string ip = 4;
+  string userAgent = 5;
+}
+
+message HistoryResponse {
+  repeated HistoryItem items = 1;
+}
