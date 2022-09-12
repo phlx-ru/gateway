@@ -1,0 +1,18 @@
+log:
+  level: ${LOG_LEVEL:debug} # vendor/github.com/go-kratos/kratos/v2/log/level.go
+metrics:
+  address: ${METRICS_ADDRESS:localhost:8125}
+  mute: ${METRICS_MUTE:true}
+server:
+  baseUrl: ${SERVER_BASE_URL:https://gateway.services.localhost}
+  http:
+    addr: ${SERVER_HTTP_ADDR:0.0.0.0:8000}
+    timeout: ${SERVER_HTTP_TIMEOUT:1s}
+client:
+  grpc:
+    notifications:
+      endpoint: ${CLIENT_GRPC_NOTIFICATIONS_ENDPOINT:notifications-server:9000}
+      timeout: ${CLIENT_GRPC_NOTIFICATIONS_TIMEOUT:10s}
+    auth:
+      endpoint: ${CLIENT_GRPC_AUTH_ENDPOINT:auth-server:9000}
+      timeout: ${CLIENT_GRPC_AUTH_TIMEOUT:10s}

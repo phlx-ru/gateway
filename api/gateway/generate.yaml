@@ -1,0 +1,5 @@
+# https://github.com/deepmap/oapi-codegen/blob/master/pkg/codegen/configuration.go#L14
+package: gateway
+generate:
+  gin-server: true
+  models: true

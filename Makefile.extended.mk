@@ -100,13 +100,10 @@ env:
 grafana:
 	@cp -u ./grafana_dashboard.json ${INFRA_DIRECTORY}/grafana/dashboards/service-${SERVICE_NAME}.json
 
-.PHONY: jwt
-# Generate JWT token for access service HTTP methods
-jwt:
-	@set -e; if [ ! -f ./bin/jwt ] ; \
-		then go build -o ./bin/jwt cmd/jwt/main.go ; \
-	fi
-	@./bin/jwt
+.PHONY: schema
+# Generates Golang types from OpenAPI from api/gateway/schema.yaml
+schema:
+	@oapi-codegen -config ./api/gateway/generate.yaml ./api/gateway/schema.yaml > ./api/gateway/schema.gen.go
 
 .PHONY: check
 # Make all checks (recommended before commit and push)
