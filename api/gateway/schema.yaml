@@ -12,160 +12,41 @@ paths:
       Возвращает данные текущего авторизованного пользователя и данные его авторизационной сессии.
       Если активной авторизационной сессии нет, то вернёт пустые данные.
     parameters:
-      - $ref: "#/components/parameters/tokenInHeaders"
-      - $ref: "#/components/parameters/tokenInQuery"
+      - $ref: "./common/schema.yaml#/components/parameters/authTokenInHeaders"
+      - $ref: "./common/schema.yaml#/components/parameters/authTokenInQuery"
     get:
       operationId: GetAuthCheck
       responses:
         '200':
-          $ref: "#/components/responses/checkResponseOK"
+          $ref: "./auth/schema.yaml#/components/responses/checkResponseOK"
         '400':
-          $ref: "#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/commonError"
         '401':
-          $ref: "#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/commonError"
         '408':
-          $ref: '#/components/responses/commonError'
+          $ref: "./common/schema.yaml#/components/responses/commonError"
         '500':
-          $ref: "#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/commonError"
 
-
-components:
-
-  parameters:
-    tokenInHeaders:
-      name: x-auth-token
-      description: Auth token from Headers
-      in: header
-      required: false
-      schema:
-        type: string
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlLGF1dGgiLCJleHAiOjc5NTOxMTU3NDJ9.vNkWaAqvTUtgzVSAhJJDJ90QLpBIMlYd_8keQb1qVH8
-    tokenInQuery:
-      name: authToken
-      description: Auth token from Query
-      in: query
-      required: false
-      schema:
-        type: string
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlLGF1dGgiLCJleHAiOjc5NTOxMTU3NDJ9.vNkWaAqvTUtgzVSAhJJDJ90QLpBIMlYd_8keQb1qVH8
-    userAgent:
-      name: user-agent
-      description: User Agent
-      in: header
-      required: false
-      schema:
-        type: string
-        example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
-    deviceId:
-      name: deviceId
-      description: DeviceId for mobile devices
-      in: header
-      required: false
-      schema:
-        type: string
-        example: 365C96E6-B22A-41FA-B569-BAF68E5F60FE # UUID v4
-    ip:
-      name: X-Real-Ip
-      description: IP-address of request
-      in: header
-      required: false
-      schema:
-        type: string
-        example: 119.232.73.137
-
-  responses:
-    commonError:
-      description: Common API error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/commonError'
-
-    checkResponseOK:
-      description: Ответ в случае активной авторизационной сессии
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/checkResponse'
-
-  schemas:
-    commonError:
-      type: object
-      additionalProperties: false
-      required:
-        - error
-      properties:
-        error:
-          type: object
-          additionalProperties: false
-          required:
-            - code
-            - reason
-            - message
-          properties:
-            code:
-              description: Error code
-              type: integer
-              example: 500
-            reason:
-              description: Typed reason of error
-              type: string
-              example: auth_error
-            message:
-              description: Error message
-              type: string
-              example: There is something wrong
-
-    checkResponse:
-      type: object
-      additionalProperties: false
-      required:
-        - user
-        - session
-      properties:
-        user:
-          type: object
-          additionalProperties: false
-          required:
-            - type
-            - displayName
-          properties:
-            type:
-              type: string
-              description: Тип пользователя из набора (admin|dispatcher|driver)
-              example: dispatcher
-            displayName:
-              type: string
-              description: Отображаемое имя пользователя
-              example: Петров Иван Васильевич
-            email:
-              type: string
-              description: Электронная почта
-              example: petrov.iv@logistics.example
-            phone:
-              type: string
-              description: Российский номер мобильного телефона в произвольной форме
-              example: +7 999 99-99 999
-        session:
-          type: object
-          additionalProperties: false
-          required:
-            - until
-          properties:
-            until:
-              type: string # https://swagger.io/specification/#data-types
-              format: date-time # https://ijmacd.github.io/rfc3339-iso8601/
-              description: Время по UTC, до которого сессия активна
-              example: 2022-09-17T22:17:17.958458Z
-            ip:
-              type: string
-              description: IP-адрес запроса, породившего сессию
-              example: 11.22.33.44
-            userAgent:
-              type: string
-              description: User-Agent запроса, породившего сессию
-              example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
-            deviceId:
-              type: string
-              description: Возможный DeviceID если запрос пришёл от мобильного устройства
-              example: 365C96E6-B22A-41FA-B569-BAF68E5F60FE # UUID v4
+  /api/1/auth/login:
+    summary: Авторизация по логину и паролю
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес электронной почты).
+      В случае успеха вернёт авторизационный токен.
+    post:
+      operationId: PostAuthLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./auth/schema.yaml#/components/schemas/loginRequestBody"
+        required: true
+      responses:
+        '200':
+          $ref: "./auth/schema.yaml#/components/responses/loginResponseOK"
+        '400':
+          $ref: "./common/schema.yaml#/components/responses/commonError"
+        '408':
+          $ref: "./common/schema.yaml#/components/responses/commonError"
+        '500':
+          $ref: "./common/schema.yaml#/components/responses/commonError"

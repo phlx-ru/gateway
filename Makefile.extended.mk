@@ -103,6 +103,8 @@ grafana:
 .PHONY: schema
 # Generates Golang types from OpenAPI from api/gateway/schema.yaml
 schema:
+	@oapi-codegen -config ./api/gateway/common/generate.yaml ./api/gateway/common/schema.yaml > ./api/gateway/common/schema.gen.go
+	@oapi-codegen -config ./api/gateway/auth/generate.yaml ./api/gateway/auth/schema.yaml > ./api/gateway/auth/schema.gen.go
 	@oapi-codegen -config ./api/gateway/generate.yaml ./api/gateway/schema.yaml > ./api/gateway/schema.gen.go
 
 .PHONY: check

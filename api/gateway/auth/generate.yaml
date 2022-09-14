@@ -1,0 +1,8 @@
+# https://github.com/deepmap/oapi-codegen/blob/master/pkg/codegen/configuration.go#L14
+package: auth
+generate:
+  models: true
+output-options:
+  skip-prune: true
+import-mapping:
+  ../common/schema.yaml: gateway/api/gateway/common

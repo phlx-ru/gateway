@@ -6,79 +6,37 @@ package gateway
 import (
 	"fmt"
 	"net/http"
-	"time"
+
+	externalRef0 "gateway/api/gateway/auth"
+	externalRef1 "gateway/api/gateway/common"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/gin-gonic/gin"
 )
 
-// CheckResponse defines model for checkResponse.
-type CheckResponse struct {
-	Session struct {
-		// Возможный DeviceID если запрос пришёл от мобильного устройства
-		DeviceId *string `json:"deviceId,omitempty"`
-
-		// IP-адрес запроса, породившего сессию
-		Ip *string `json:"ip,omitempty"`
-
-		// Время, до которого сессия активна
-		Until time.Time `json:"until"`
-
-		// User-Agent запроса, породившего сессию
-		UserAgent *string `json:"userAgent,omitempty"`
-	} `json:"session"`
-	User struct {
-		// Отображаемое имя пользователя
-		DisplayName string `json:"displayName"`
-
-		// Электронная почта
-		Email *string `json:"email,omitempty"`
-
-		// Российский номер мобильного телефона в произвольной форме
-		Phone *string `json:"phone,omitempty"`
-
-		// Тип пользователя из набора (admin|dispatcher|driver)
-		Type string `json:"type"`
-	} `json:"user"`
-}
-
-// CommonError defines model for commonError.
-type CommonError struct {
-	Error struct {
-		// Error code
-		Code int `json:"code"`
-
-		// Error message
-		Message string `json:"message"`
-
-		// Typed reason of error
-		Reason string `json:"reason"`
-	} `json:"error"`
-}
-
-// TokenInHeaders defines model for tokenInHeaders.
-type TokenInHeaders = string
-
-// TokenInQuery defines model for tokenInQuery.
-type TokenInQuery = string
-
-// CheckResponseOK defines model for checkResponseOK.
-type CheckResponseOK = CheckResponse
-
 // GetAuthCheckParams defines parameters for GetAuthCheck.
 type GetAuthCheckParams struct {
 	// Auth token from Query
-	AuthToken *TokenInQuery `form:"authToken,omitempty" json:"authToken,omitempty"`
+	AuthToken *externalRef1.AuthTokenInQuery `form:"authToken,omitempty" json:"authToken,omitempty"`
 
 	// Auth token from Headers
-	XAuthToken *TokenInHeaders `json:"x-auth-token,omitempty"`
+	XAuthToken *externalRef1.AuthTokenInHeaders `json:"x-auth-token,omitempty"`
 }
+
+// PostAuthLoginJSONBody defines parameters for PostAuthLogin.
+type PostAuthLoginJSONBody = externalRef0.LoginRequestBody
+
+// PostAuthLoginJSONRequestBody defines body for PostAuthLogin for application/json ContentType.
+type PostAuthLoginJSONRequestBody = PostAuthLoginJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
 	// (GET /api/1/auth/check)
 	GetAuthCheck(c *gin.Context, params GetAuthCheckParams)
+
+	// (POST /api/1/auth/login)
+	PostAuthLogin(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -112,7 +70,7 @@ func (siw *ServerInterfaceWrapper) GetAuthCheck(c *gin.Context) {
 
 	// ------------- Optional header parameter "x-auth-token" -------------
 	if valueList, found := headers[http.CanonicalHeaderKey("x-auth-token")]; found {
-		var XAuthToken TokenInHeaders
+		var XAuthToken externalRef1.AuthTokenInHeaders
 		n := len(valueList)
 		if n != 1 {
 			c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprintf("Expected one value for x-auth-token, got %d", n)})
@@ -136,6 +94,16 @@ func (siw *ServerInterfaceWrapper) GetAuthCheck(c *gin.Context) {
 	siw.Handler.GetAuthCheck(c, params)
 }
 
+// PostAuthLogin operation middleware
+func (siw *ServerInterfaceWrapper) PostAuthLogin(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+	}
+
+	siw.Handler.PostAuthLogin(c)
+}
+
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
 	BaseURL     string
@@ -155,6 +123,8 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 	}
 
 	router.GET(options.BaseURL+"/api/1/auth/check", wrapper.GetAuthCheck)
+
+	router.POST(options.BaseURL+"/api/1/auth/login", wrapper.PostAuthLogin)
 
 	return router
 }

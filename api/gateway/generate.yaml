@@ -3,3 +3,6 @@ package: gateway
 generate:
   gin-server: true
   models: true
+import-mapping:
+  ./common/schema.yaml: gateway/api/gateway/common
+  ./auth/schema.yaml:   gateway/api/gateway/auth

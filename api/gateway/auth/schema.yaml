@@ -1,0 +1,170 @@
+openapi: 3.0.0 # https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md
+info:
+  version: 1.0.0
+  title: auth components
+  description: >
+    Компоненты для авторизации
+
+paths:
+  # here for schema compatibility
+
+components:
+
+  responses:
+    checkResponseOK:
+      description: Ответ в случае активной авторизационной сессии
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/checkResponse'
+
+    loginResponseOK:
+      description: Ответ в случае корректно указанных логина и пароля
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/loginResponse'
+
+  parameters:
+    userAgent:
+      name: user-agent
+      description: User Agent
+      in: header
+      required: false
+      schema:
+        $ref: "#/components/schemas/propertyUserAgent"
+    deviceId:
+      name: deviceId
+      description: DeviceId for mobile devices
+      in: header
+      required: false
+      schema:
+        $ref: "#/components/schemas/propertyDeviceId"
+    ip:
+      name: X-Real-Ip
+      description: IP-address of request
+      in: header
+      required: false
+      schema:
+        $ref: "#/components/schemas/propertyIP"
+
+  schemas:
+    propertyIP:
+      type: string
+      description: IP-адрес
+      example: 119.232.73.137
+
+    propertyUserAgent:
+      type: string
+      description: User-Agent
+      example: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36
+
+    propertyDeviceId:
+      type: string
+      description: Возможный DeviceID если запрос пришёл от мобильного устройства
+      example: 365C96E6-B22A-41FA-B569-BAF68E5F60FE # UUID v4
+
+    propertyUsername:
+      type: string
+      description: Номер телефона (в произвольной форме) или адрес электронной почты
+      example:
+        - 9009009090
+        - 79009009090
+        - 89009009090
+        - +7 900 900 90 90
+        - +7_[900]_900-90-90
+        - john@dohn.example
+
+    propertyPassword:
+      type: string
+      description: Пароль пользователя — от 8 до 255 символов
+      format: password
+
+    propertyUserType:
+      type: string
+      description: Тип пользователя из набора (admin|dispatcher|driver)
+      example: dispatcher
+
+    propertyUserDisplayName:
+      type: string
+      description: Отображаемое имя пользователя
+      example: Петров Иван Васильевич
+
+    propertyUserEmail:
+      type: string
+      description: Электронная почта
+      example: petrov.iv@logistics.example
+
+    propertyUserPhoneTyped:
+      type: string
+      description: Российский номер мобильного телефона в формате 9009009090
+      example: 9009009090
+
+    propertySessionUntil:
+      type: string # https://swagger.io/specification/#data-types
+      format: date-time # https://ijmacd.github.io/rfc3339-iso8601/
+      description: Время по UTC, до которого сессия активна
+      example: 2022-09-17T22:17:17.958458Z
+
+    checkResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - user
+        - session
+      properties:
+        user:
+          type: object
+          additionalProperties: false
+          description: Данные об авторизованном пользователе
+          required:
+            - type
+            - displayName
+          properties:
+            type:
+              $ref: "#/components/schemas/propertyUserType"
+            displayName:
+              $ref: "#/components/schemas/propertyUserDisplayName"
+            email:
+              $ref: "#/components/schemas/propertyUserEmail"
+            phone:
+              $ref: "#/components/schemas/propertyUserPhoneTyped"
+        session:
+          type: object
+          additionalProperties: false
+          description: Данные авторизационной сессии
+          required:
+            - until
+          properties:
+            until:
+              $ref: "#/components/schemas/propertySessionUntil"
+            ip:
+              $ref: "#/components/schemas/propertyIP"
+            userAgent:
+              $ref: "#/components/schemas/propertyUserAgent"
+            deviceId:
+              $ref: "#/components/schemas/propertyDeviceId"
+
+    loginRequestBody:
+      type: object
+      additionalProperties: false
+      required:
+        - username
+        - password
+      properties:
+        username:
+          $ref: "#/components/schemas/propertyUsername"
+        password:
+          $ref: "#/components/schemas/propertyPassword"
+
+    loginResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - token
+        - until
+      properties:
+        token:
+          $ref: "../common/schema.yaml#/components/schemas/propertyAuthToken"
+        until:
+          $ref: "#/components/schemas/propertySessionUntil"
