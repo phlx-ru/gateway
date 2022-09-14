@@ -3,6 +3,7 @@ package: gateway
 generate:
   gin-server: true
   models: true
+  embedded-spec: true
 import-mapping:
   ./common/schema.yaml: gateway/api/gateway/common
   ./auth/schema.yaml:   gateway/api/gateway/auth

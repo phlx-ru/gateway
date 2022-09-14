@@ -3,12 +3,12 @@ package service
 import (
 	"context"
 
-	"gateway/api/gateway"
+	"gateway/api/gateway/auth"
 	"gateway/internal/clients"
 	"github.com/go-kratos/kratos/v2/errors"
 )
 
-func (s *GatewayService) getAuthCheck(ctx context.Context, token string) (*gateway.CheckResponseOK, error) {
+func (s *GatewayService) getAuthCheck(ctx context.Context, token string) (*auth.CheckResponseOK, error) {
 	if token == "" {
 		return nil, errors.BadRequest(`token_not_found`, `not found authToken in query or X-Auth-Token in headers`)
 	}
@@ -20,7 +20,7 @@ func (s *GatewayService) getAuthCheck(ctx context.Context, token string) (*gatew
 		return nil, errors.InternalServer(`auth_client_error`, err.Error())
 	}
 
-	response := &gateway.CheckResponseOK{}
+	response := &auth.CheckResponseOK{}
 
 	if res.User != nil {
 		response.User.DisplayName = res.User.DisplayName
