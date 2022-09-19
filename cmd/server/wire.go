@@ -8,6 +8,7 @@ package main
 import (
 	"context"
 
+	"gateway/internal/biz"
 	"gateway/internal/clients"
 	"gateway/internal/conf"
 	"gateway/internal/pkg/metrics"
@@ -29,5 +30,5 @@ func wireApp(
 	*kratos.App,
 	error,
 ) {
-	panic(wire.Build(server.ProviderSet, service.ProviderSet, newApp))
+	panic(wire.Build(server.ProviderSet, service.ProviderSet, biz.ProviderSet, newApp))
 }

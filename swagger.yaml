@@ -1,0 +1,204 @@
+openapi: 3.0.0
+info:
+  version: 1.1.1
+  title: gateway
+  description: API Gateway and API Composition service for Cargo
+  termsOfService: http://swagger.io/terms/
+servers:
+  - url: https://gateway.cargo.b-resh.ru
+    description: API on staging environment
+paths:
+  /api/1/auth/check:
+    summary: >-
+      Получение текущих данных по пользователю и авторизационной сессии, если
+      последняя активна
+    description: >
+      Возвращает данные текущего авторизованного пользователя и данные его
+      авторизационной сессии. Если активной авторизационной сессии нет, то
+      вернёт пустые данные.
+    parameters:
+      - name: authToken
+        description: Auth token from Query
+        in: query
+        required: false
+        schema: &ref_1
+          type: string
+          description: Авторизационный токен для пользовательской сессии
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlLGF1dGgiLCJleHAiOjc5NTOxMTU3NDJ9.vNkWaAqvTUtgzVSAhJJDJ90QLpBIMlYd_8keQb1qVH8
+    get:
+      operationId: GetAuthCheck
+      responses:
+        '200':
+          description: Ответ в случае активной авторизационной сессии
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - user
+                  - session
+                properties:
+                  user:
+                    type: object
+                    additionalProperties: false
+                    description: Данные об авторизованном пользователе
+                    required:
+                      - type
+                      - displayName
+                    properties:
+                      type:
+                        type: string
+                        description: Тип пользователя из набора (admin|dispatcher|driver)
+                        example: dispatcher
+                      displayName:
+                        type: string
+                        description: Отображаемое имя пользователя
+                        example: Петров Иван Васильевич
+                      email:
+                        type: string
+                        description: Электронная почта
+                        example: petrov.iv@logistics.example
+                      phone:
+                        type: string
+                        description: >-
+                          Российский номер мобильного телефона в формате
+                          9009009090
+                        example: 9009009090
+                  session:
+                    type: object
+                    additionalProperties: false
+                    description: Данные авторизационной сессии
+                    required:
+                      - until
+                    properties:
+                      until: &ref_2
+                        type: string
+                        format: date-time
+                        description: Время по UTC, до которого сессия активна
+                        example: 2022-09-17T22:17:17.958Z
+                      ip:
+                        type: string
+                        description: IP-адрес
+                        example: 119.232.73.137
+                      userAgent:
+                        type: string
+                        description: User-Agent
+                        example: >-
+                          Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+                          AppleWebKit/537.36 (KHTML, like Gecko)
+                          Chrome/104.0.0.0 Safari/537.36
+                      deviceId:
+                        type: string
+                        description: >-
+                          Возможный DeviceID если запрос пришёл от мобильного
+                          устройства
+                        example: 365C96E6-B22A-41FA-B569-BAF68E5F60FE
+        '400': &ref_3
+          description: 400 Bad Request
+          content:
+            application/json:
+              schema: &ref_0
+                type: object
+                additionalProperties: false
+                required:
+                  - error
+                properties:
+                  error:
+                    type: object
+                    additionalProperties: false
+                    required:
+                      - code
+                      - reason
+                      - message
+                    properties:
+                      code:
+                        description: Error code
+                        type: integer
+                        example: 500
+                      reason:
+                        description: Typed reason of error
+                        type: string
+                        example: auth_error
+                      message:
+                        description: Error message
+                        type: string
+                        example: There is something wrong
+        '401':
+          description: 401 Unauthorized
+          content:
+            application/json:
+              schema: *ref_0
+        '429':
+          description: 429 Too Many Requests
+          content:
+            application/json:
+              schema: *ref_0
+        '500': &ref_4
+          description: 500 Internal Server Error
+          content:
+            application/json:
+              schema: *ref_0
+  /api/1/auth/login:
+    summary: Авторизация по логину и паролю
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес
+      электронной почты). В случае успеха вернёт авторизационный токен.
+    post:
+      operationId: PostAuthLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                  description: >-
+                    Номер телефона (в произвольной форме) или адрес электронной
+                    почты
+                  x-oapi-codegen-extra-tags:
+                    validate: required,min=3,max=255
+                  example:
+                    - 9009009090
+                    - 79009009090
+                    - 89009009090
+                    - +7 900 900 90 90
+                    - +7_[900]_900-90-90
+                    - john@dohn.example
+                password:
+                  type: string
+                  description: Пароль пользователя — от 8 до 255 символов
+                  x-oapi-codegen-extra-tags:
+                    validate: required,min=8,max=255
+                  format: password
+        required: true
+      responses:
+        '200':
+          description: Ответ в случае корректно указанных логина и пароля
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required:
+                  - token
+                  - until
+                properties:
+                  token: *ref_1
+                  until: *ref_2
+        '400': *ref_3
+        '500': *ref_4
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - BearerAuth: []

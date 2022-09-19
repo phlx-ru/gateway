@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"gateway/internal/biz"
 	"gateway/internal/clients"
 	"gateway/internal/conf"
 	"gateway/internal/pkg/metrics"
@@ -21,7 +22,8 @@ import (
 
 // wireApp init kratos application.
 func wireApp(contextContext context.Context, confServer *conf.Server, authClient clients.AuthClient, metricsMetrics metrics.Metrics, logger log.Logger) (*kratos.App, error) {
-	gatewayService := service.NewGatewayService(authClient, metricsMetrics, logger)
+	gatewayUsecase := biz.NewGatewayUsecase(authClient, metricsMetrics, logger)
+	gatewayService := service.NewGatewayService(gatewayUsecase, metricsMetrics, logger)
 	httpServer := server.NewHTTPServer(confServer, gatewayService, metricsMetrics, logger)
 	app := newApp(contextContext, logger, httpServer)
 	return app, nil

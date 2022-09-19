@@ -26,15 +26,39 @@ components:
         $ref: "#/components/schemas/propertyAuthToken"
 
   responses:
-    commonError:
+    errorCommon:
       description: Common API error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/commonError'
+            $ref: '#/components/schemas/errorCommon'
+    errorBadRequest:
+      description: 400 Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorCommon'
+    errorUnauthorized:
+      description: 401 Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorCommon'
+    errorTooManyRequests:
+      description: 429 Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorCommon'
+    errorInternal:
+      description: 500 Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorCommon'
 
   schemas:
-    commonError:
+    errorCommon:
       type: object
       additionalProperties: false
       required:

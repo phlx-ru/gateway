@@ -1,8 +1,14 @@
 openapi: 3.0.0 # https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md
+
 info:
   version: 1.1.1
   title: gateway
   description: API Gateway and API Composition service for Cargo
+  termsOfService: http://swagger.io/terms/
+
+servers:
+  - url: https://gateway.cargo.b-resh.ru
+    description: API on staging environment
 
 paths:
 
@@ -12,7 +18,6 @@ paths:
       Возвращает данные текущего авторизованного пользователя и данные его авторизационной сессии.
       Если активной авторизационной сессии нет, то вернёт пустые данные.
     parameters:
-      - $ref: "./common/schema.yaml#/components/parameters/authTokenInHeaders"
       - $ref: "./common/schema.yaml#/components/parameters/authTokenInQuery"
     get:
       operationId: GetAuthCheck
@@ -20,13 +25,13 @@ paths:
         '200':
           $ref: "./auth/schema.yaml#/components/responses/checkResponseOK"
         '400':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
         '401':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
-        '408':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/errorUnauthorized"
+        '429':
+          $ref: "./common/schema.yaml#/components/responses/errorTooManyRequests"
         '500':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
 
   /api/1/auth/login:
     summary: Авторизация по логину и паролю
@@ -40,13 +45,120 @@ paths:
           application/json:
             schema:
               $ref: "./auth/schema.yaml#/components/schemas/loginRequestBody"
-        required: true
       responses:
         '200':
           $ref: "./auth/schema.yaml#/components/responses/loginResponseOK"
         '400':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
-        '408':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
         '500':
-          $ref: "./common/schema.yaml#/components/responses/commonError"
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
+
+  /api/1/auth/generateCode:
+    summary: Отправка одноразового кода авторизации
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес электронной почты).
+      Генерирует кратковременный одноразовый код авторизации и отправляет его на телефон или почту пользователя.
+    post:
+      operationId: PostGenerateCode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./auth/schema.yaml#/components/schemas/generateCodeRequestBody"
+      responses:
+        '204':
+          $ref: "./auth/schema.yaml#/components/responses/responseNoContent"
+        '400':
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
+        '500':
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
+
+  /api/1/auth/loginByCode:
+    summary: Авторизация по логину и одноразовому коду
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес электронной почты) и одноразовый код.
+      В случае успеха вернёт авторизационный токен.
+    post:
+      operationId: PostAuthLoginByCode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./auth/schema.yaml#/components/schemas/loginByCodeRequestBody"
+      responses:
+        '200':
+          $ref: "./auth/schema.yaml#/components/responses/loginResponseOK"
+        '400':
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
+        '500':
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
+
+  /api/1/auth/resetPassword:
+    summary: Сброс пароля с отправкой хэша (или ссылки установки нового пароля) уведомлением пользователю
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес электронной почты).
+      В случае успеха вернёт пустой ответ.
+    post:
+      operationId: PostResetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./auth/schema.yaml#/components/schemas/resetPasswordRequestBody"
+      responses:
+        '204':
+          $ref: "./auth/schema.yaml#/components/responses/responseNoContent"
+        '400':
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
+        '500':
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
+
+  /api/1/auth/newPassword:
+    summary: Установка нового пароля с помощью хэшкода или ссылки сброса пароля
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес электронной почты) и код сброса пароля.
+      В случае успеха вернёт пустой ответ.
+    post:
+      operationId: PostNewPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./auth/schema.yaml#/components/schemas/newPasswordRequestBody"
+      responses:
+        '204':
+          $ref: "./auth/schema.yaml#/components/responses/responseNoContent"
+        '400':
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
+        '500':
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
+
+  /api/1/auth/changePassword:
+    summary: Установка нового пароля с вводом старого пароля
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес электронной почты), старый и новый пароли.
+      В случае успеха вернёт пустой ответ.
+    post:
+      operationId: PostChangePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "./auth/schema.yaml#/components/schemas/changePasswordRequestBody"
+      responses:
+        '204':
+          $ref: "./auth/schema.yaml#/components/responses/responseNoContent"
+        '400':
+          $ref: "./common/schema.yaml#/components/responses/errorBadRequest"
+        '500':
+          $ref: "./common/schema.yaml#/components/responses/errorInternal"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

@@ -21,29 +21,75 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
+// PostChangePasswordJSONBody defines parameters for PostChangePassword.
+type PostChangePasswordJSONBody = externalRef0.ChangePasswordRequestBody
+
 // GetAuthCheckParams defines parameters for GetAuthCheck.
 type GetAuthCheckParams struct {
 	// Auth token from Query
 	AuthToken *externalRef1.AuthTokenInQuery `form:"authToken,omitempty" json:"authToken,omitempty"`
-
-	// Auth token from Headers
-	XAuthToken *externalRef1.AuthTokenInHeaders `json:"x-auth-token,omitempty"`
 }
+
+// PostGenerateCodeJSONBody defines parameters for PostGenerateCode.
+type PostGenerateCodeJSONBody = externalRef0.GenerateCodeRequestBody
 
 // PostAuthLoginJSONBody defines parameters for PostAuthLogin.
 type PostAuthLoginJSONBody = externalRef0.LoginRequestBody
 
+// PostAuthLoginByCodeJSONBody defines parameters for PostAuthLoginByCode.
+type PostAuthLoginByCodeJSONBody = externalRef0.LoginByCodeRequestBody
+
+// PostNewPasswordJSONBody defines parameters for PostNewPassword.
+type PostNewPasswordJSONBody = externalRef0.NewPasswordRequestBody
+
+// PostResetPasswordJSONBody defines parameters for PostResetPassword.
+type PostResetPasswordJSONBody = externalRef0.ResetPasswordRequestBody
+
+// PostChangePasswordJSONRequestBody defines body for PostChangePassword for application/json ContentType.
+type PostChangePasswordJSONRequestBody = PostChangePasswordJSONBody
+
+// PostGenerateCodeJSONRequestBody defines body for PostGenerateCode for application/json ContentType.
+type PostGenerateCodeJSONRequestBody = PostGenerateCodeJSONBody
+
 // PostAuthLoginJSONRequestBody defines body for PostAuthLogin for application/json ContentType.
 type PostAuthLoginJSONRequestBody = PostAuthLoginJSONBody
+
+// PostAuthLoginByCodeJSONRequestBody defines body for PostAuthLoginByCode for application/json ContentType.
+type PostAuthLoginByCodeJSONRequestBody = PostAuthLoginByCodeJSONBody
+
+// PostNewPasswordJSONRequestBody defines body for PostNewPassword for application/json ContentType.
+type PostNewPasswordJSONRequestBody = PostNewPasswordJSONBody
+
+// PostResetPasswordJSONRequestBody defines body for PostResetPassword for application/json ContentType.
+type PostResetPasswordJSONRequestBody = PostResetPasswordJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
+	// (POST /api/1/auth/changePassword)
+	PostChangePassword(c *gin.Context)
+
 	// (GET /api/1/auth/check)
 	GetAuthCheck(c *gin.Context, params GetAuthCheckParams)
 
+	// (POST /api/1/auth/generateCode)
+	PostGenerateCode(c *gin.Context)
+
 	// (POST /api/1/auth/login)
 	PostAuthLogin(c *gin.Context)
+
+	// (POST /api/1/auth/loginByCode)
+	PostAuthLoginByCode(c *gin.Context)
+
+	// (POST /api/1/auth/newPassword)
+	PostNewPassword(c *gin.Context)
+
+	// (POST /api/1/auth/resetPassword)
+	PostResetPassword(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -54,10 +100,24 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
+// PostChangePassword operation middleware
+func (siw *ServerInterfaceWrapper) PostChangePassword(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{""})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+	}
+
+	siw.Handler.PostChangePassword(c)
+}
+
 // GetAuthCheck operation middleware
 func (siw *ServerInterfaceWrapper) GetAuthCheck(c *gin.Context) {
 
 	var err error
+
+	c.Set(BearerAuthScopes, []string{""})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetAuthCheckParams
@@ -73,27 +133,6 @@ func (siw *ServerInterfaceWrapper) GetAuthCheck(c *gin.Context) {
 		return
 	}
 
-	headers := c.Request.Header
-
-	// ------------- Optional header parameter "x-auth-token" -------------
-	if valueList, found := headers[http.CanonicalHeaderKey("x-auth-token")]; found {
-		var XAuthToken externalRef1.AuthTokenInHeaders
-		n := len(valueList)
-		if n != 1 {
-			c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprintf("Expected one value for x-auth-token, got %d", n)})
-			return
-		}
-
-		err = runtime.BindStyledParameterWithLocation("simple", false, "x-auth-token", runtime.ParamLocationHeader, valueList[0], &XAuthToken)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprintf("Invalid format for parameter x-auth-token: %s", err)})
-			return
-		}
-
-		params.XAuthToken = &XAuthToken
-
-	}
-
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 	}
@@ -101,14 +140,64 @@ func (siw *ServerInterfaceWrapper) GetAuthCheck(c *gin.Context) {
 	siw.Handler.GetAuthCheck(c, params)
 }
 
+// PostGenerateCode operation middleware
+func (siw *ServerInterfaceWrapper) PostGenerateCode(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{""})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+	}
+
+	siw.Handler.PostGenerateCode(c)
+}
+
 // PostAuthLogin operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthLogin(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{""})
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 	}
 
 	siw.Handler.PostAuthLogin(c)
+}
+
+// PostAuthLoginByCode operation middleware
+func (siw *ServerInterfaceWrapper) PostAuthLoginByCode(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{""})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+	}
+
+	siw.Handler.PostAuthLoginByCode(c)
+}
+
+// PostNewPassword operation middleware
+func (siw *ServerInterfaceWrapper) PostNewPassword(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{""})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+	}
+
+	siw.Handler.PostNewPassword(c)
+}
+
+// PostResetPassword operation middleware
+func (siw *ServerInterfaceWrapper) PostResetPassword(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{""})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+	}
+
+	siw.Handler.PostResetPassword(c)
 }
 
 // GinServerOptions provides options for the Gin server.
@@ -129,9 +218,19 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 		HandlerMiddlewares: options.Middlewares,
 	}
 
+	router.POST(options.BaseURL+"/api/1/auth/changePassword", wrapper.PostChangePassword)
+
 	router.GET(options.BaseURL+"/api/1/auth/check", wrapper.GetAuthCheck)
 
+	router.POST(options.BaseURL+"/api/1/auth/generateCode", wrapper.PostGenerateCode)
+
 	router.POST(options.BaseURL+"/api/1/auth/login", wrapper.PostAuthLogin)
+
+	router.POST(options.BaseURL+"/api/1/auth/loginByCode", wrapper.PostAuthLoginByCode)
+
+	router.POST(options.BaseURL+"/api/1/auth/newPassword", wrapper.PostNewPassword)
+
+	router.POST(options.BaseURL+"/api/1/auth/resetPassword", wrapper.PostResetPassword)
 
 	return router
 }
@@ -139,19 +238,28 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

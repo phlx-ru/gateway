@@ -46,15 +46,17 @@ func NewHTTPServer(
 	)
 	router.Static(`/auth`, `./static/auth`)
 
+	router.GET(`/api/swagger`, gw.GetSwagger)
+
 	router.GET(
 		// TODO REMOVE
-		"/helloworld/:name", func(ctx *gin.Context) {
-			name := ctx.Param("name")
+		"/helloworld/:name", func(c *gin.Context) {
+			name := c.Param("name")
 			if name == "error" {
 				// 返回kratos error
-				kgin.Error(ctx, errors.Unauthorized("auth_error", "no authentication"))
+				kgin.Error(c, errors.Unauthorized("auth_error", "no authentication"))
 			} else {
-				ctx.JSON(200, map[string]string{"welcome": name})
+				c.JSON(200, map[string]string{"welcome": name})
 			}
 		},
 	)

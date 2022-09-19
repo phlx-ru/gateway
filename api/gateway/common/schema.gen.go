@@ -15,8 +15,8 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// CommonError defines model for commonError.
-type CommonError struct {
+// ErrorCommon defines model for errorCommon.
+type ErrorCommon struct {
 	Error struct {
 		// Error code
 		Code int `json:"code"`
@@ -38,21 +38,35 @@ type AuthTokenInHeaders = PropertyAuthToken
 // Авторизационный токен для пользовательской сессии
 type AuthTokenInQuery = PropertyAuthToken
 
+// ErrorBadRequest defines model for errorBadRequest.
+type ErrorBadRequest = ErrorCommon
+
+// ErrorInternal defines model for errorInternal.
+type ErrorInternal = ErrorCommon
+
+// ErrorTooManyRequests defines model for errorTooManyRequests.
+type ErrorTooManyRequests = ErrorCommon
+
+// ErrorUnauthorized defines model for errorUnauthorized.
+type ErrorUnauthorized = ErrorCommon
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"BwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

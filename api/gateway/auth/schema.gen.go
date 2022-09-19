@@ -18,6 +18,18 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+// ChangePasswordRequestBody defines model for changePasswordRequestBody.
+type ChangePasswordRequestBody struct {
+	// Пароль пользователя — от 8 до 255 символов
+	NewPassword PropertyPassword `json:"newPassword" validate:"required,min=8,max=255"`
+
+	// Пароль пользователя — от 8 до 255 символов
+	OldPassword PropertyPassword `json:"oldPassword" validate:"required,min=8,max=255"`
+
+	// Номер телефона (в произвольной форме) или адрес электронной почты
+	Username PropertyUsername `form:"username" json:"username" validate:"required,min=3,max=255"`
+}
+
 // CheckResponse defines model for checkResponse.
 type CheckResponse struct {
 	// Данные авторизационной сессии
@@ -51,13 +63,34 @@ type CheckResponse struct {
 	} `json:"user"`
 }
 
+// GenerateCodeRequestBody defines model for generateCodeRequestBody.
+type GenerateCodeRequestBody struct {
+	// Номер телефона (в произвольной форме) или адрес электронной почты
+	Username PropertyUsername `form:"username" json:"username" validate:"required,min=3,max=255"`
+}
+
+// LoginByCodeRequestBody defines model for loginByCodeRequestBody.
+type LoginByCodeRequestBody struct {
+	// Одноразовый код авторизации
+	Code PropertyCode `json:"code" validate:"required,min=3,max=255"`
+
+	// Опция "Запомнить меня" — сохранять ли авторизационную сессию надолго
+	Remember *PropertyRemember `form:"remember" json:"remember,omitempty" validate:"omitempty,boolean"`
+
+	// Номер телефона (в произвольной форме) или адрес электронной почты
+	Username PropertyUsername `form:"username" json:"username" validate:"required,min=3,max=255"`
+}
+
 // LoginRequestBody defines model for loginRequestBody.
 type LoginRequestBody struct {
 	// Пароль пользователя — от 8 до 255 символов
-	Password PropertyPassword `json:"password"`
+	Password PropertyPassword `json:"password" validate:"required,min=8,max=255"`
+
+	// Опция "Запомнить меня" — сохранять ли авторизационную сессию надолго
+	Remember *PropertyRemember `form:"remember" json:"remember,omitempty" validate:"omitempty,boolean"`
 
 	// Номер телефона (в произвольной форме) или адрес электронной почты
-	Username PropertyUsername `json:"username"`
+	Username PropertyUsername `form:"username" json:"username" validate:"required,min=3,max=255"`
 }
 
 // LoginResponse defines model for loginResponse.
@@ -69,6 +102,24 @@ type LoginResponse struct {
 	Until PropertySessionUntil `json:"until"`
 }
 
+// NewPasswordRequestBody defines model for newPasswordRequestBody.
+type NewPasswordRequestBody struct {
+	// Пароль пользователя — от 8 до 255 символов
+	Password PropertyPassword `json:"password" validate:"required,min=8,max=255"`
+
+	// Код сброса пароля
+	PasswordResetHash PasswordResetHash `json:"passwordResetHash" validate:"required,min=3,max=255"`
+
+	// Номер телефона (в произвольной форме) или адрес электронной почты
+	Username PropertyUsername `form:"username" json:"username" validate:"required,min=3,max=255"`
+}
+
+// Код сброса пароля
+type PasswordResetHash = string
+
+// Одноразовый код авторизации
+type PropertyCode = string
+
 // Возможный DeviceID если запрос пришёл от мобильного устройства
 type PropertyDeviceId = string
 
@@ -77,6 +128,9 @@ type PropertyIP = string
 
 // Пароль пользователя — от 8 до 255 символов
 type PropertyPassword = string
+
+// Опция "Запомнить меня" — сохранять ли авторизационную сессию надолго
+type PropertyRemember = bool
 
 // Время по UTC, до которого сессия активна
 type PropertySessionUntil = time.Time
@@ -99,6 +153,12 @@ type PropertyUserType = string
 // Номер телефона (в произвольной форме) или адрес электронной почты
 type PropertyUsername = string
 
+// ResetPasswordRequestBody defines model for resetPasswordRequestBody.
+type ResetPasswordRequestBody struct {
+	// Номер телефона (в произвольной форме) или адрес электронной почты
+	Username PropertyUsername `form:"username" json:"username" validate:"required,min=3,max=255"`
+}
+
 // Возможный DeviceID если запрос пришёл от мобильного устройства
 type DeviceId = PropertyDeviceId
 
@@ -114,34 +174,43 @@ type CheckResponseOK = CheckResponse
 // LoginResponseOK defines model for loginResponseOK.
 type LoginResponseOK = LoginResponse
 
+// Данные отсутствуют
+type ResponseNoContent = interface{}
+
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/4yEWoF3EAAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

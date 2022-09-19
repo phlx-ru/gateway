@@ -6,7 +6,7 @@ info:
     Компоненты для авторизации
 
 paths:
-  # here for schema compatibility
+# here for schema compatibility
 
 components:
 
@@ -19,11 +19,18 @@ components:
             $ref: '#/components/schemas/checkResponse'
 
     loginResponseOK:
-      description: Ответ в случае корректно указанных логина и пароля
+      description: Ответ в случае успешной аутентификации
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/loginResponse'
+
+    responseNoContent:
+      description: Ответ в случае успеха без возвращаемых данных
+      content:
+        application/json:
+          schema:
+            description: Данные отсутствуют
 
   parameters:
     userAgent:
@@ -67,6 +74,9 @@ components:
     propertyUsername:
       type: string
       description: Номер телефона (в произвольной форме) или адрес электронной почты
+      x-oapi-codegen-extra-tags:
+        validate: "required,min=3,max=255"
+        form: username
       example:
         - 9009009090
         - 79009009090
@@ -78,7 +88,31 @@ components:
     propertyPassword:
       type: string
       description: Пароль пользователя — от 8 до 255 символов
+      x-oapi-codegen-extra-tags:
+        validate: "required,min=8,max=255"
       format: password
+      example: qwertyui
+
+    passwordResetHash:
+      type: string
+      description: Код сброса пароля
+      x-oapi-codegen-extra-tags:
+        validate: "required,min=3,max=255"
+      example: h98d64
+
+    propertyRemember:
+      type: boolean
+      description: Опция "Запомнить меня" — сохранять ли авторизационную сессию надолго
+      x-oapi-codegen-extra-tags:
+        validate: "omitempty,boolean"
+        form: remember
+
+    propertyCode:
+      type: string
+      description: Одноразовый код авторизации
+      x-oapi-codegen-extra-tags:
+        validate: "required,min=3,max=255"
+      example: 8093
 
     propertyUserType:
       type: string
@@ -156,6 +190,8 @@ components:
           $ref: "#/components/schemas/propertyUsername"
         password:
           $ref: "#/components/schemas/propertyPassword"
+        remember:
+          $ref: "#/components/schemas/propertyRemember"
 
     loginResponse:
       type: object
@@ -168,3 +204,65 @@ components:
           $ref: "../common/schema.yaml#/components/schemas/propertyAuthToken"
         until:
           $ref: "#/components/schemas/propertySessionUntil"
+
+    generateCodeRequestBody:
+      type: object
+      additionalProperties: false
+      required:
+        - username
+      properties:
+        username:
+          $ref: "#/components/schemas/propertyUsername"
+
+    loginByCodeRequestBody:
+      type: object
+      additionalProperties: false
+      required:
+        - username
+        - code
+      properties:
+        username:
+          $ref: "#/components/schemas/propertyUsername"
+        code:
+          $ref: "#/components/schemas/propertyCode"
+        remember:
+          $ref: "#/components/schemas/propertyRemember"
+
+    resetPasswordRequestBody:
+      type: object
+      additionalProperties: false
+      required:
+        - username
+      properties:
+        username:
+          $ref: "#/components/schemas/propertyUsername"
+
+    newPasswordRequestBody:
+      type: object
+      additionalProperties: false
+      required:
+        - username
+        - passwordResetHash
+        - password
+      properties:
+        username:
+          $ref: "#/components/schemas/propertyUsername"
+        passwordResetHash:
+          $ref: "#/components/schemas/passwordResetHash"
+        password:
+          $ref: "#/components/schemas/propertyPassword"
+
+    changePasswordRequestBody:
+      type: object
+      additionalProperties: false
+      required:
+        - username
+        - oldPassword
+        - newPassword
+      properties:
+        username:
+          $ref: "#/components/schemas/propertyUsername"
+        oldPassword:
+          $ref: "#/components/schemas/propertyPassword"
+        newPassword:
+          $ref: "#/components/schemas/propertyPassword"
