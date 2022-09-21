@@ -9,6 +9,14 @@ info:
 servers:
   - url: https://gateway.cargo.b-resh.ru
     description: API on staging environment
+  - url: https://gateway.services.localhost
+    description: API on local infra
+  - url: http://localhost:8000
+    description: API on local debug
+
+tags:
+  - name: auth
+    description: Авторизация
 
 paths:
 
@@ -20,6 +28,8 @@ paths:
     parameters:
       - $ref: "./common/schema.yaml#/components/parameters/authTokenInQuery"
     get:
+      tags: [ 'auth' ]
+      security: [ BearerAuth: { } ]
       operationId: GetAuthCheck
       responses:
         '200':
@@ -39,6 +49,7 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес электронной почты).
       В случае успеха вернёт авторизационный токен.
     post:
+      tags: [ 'auth' ]
       operationId: PostAuthLogin
       requestBody:
         content:
@@ -59,6 +70,7 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес электронной почты).
       Генерирует кратковременный одноразовый код авторизации и отправляет его на телефон или почту пользователя.
     post:
+      tags: [ 'auth' ]
       operationId: PostGenerateCode
       requestBody:
         content:
@@ -79,6 +91,7 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес электронной почты) и одноразовый код.
       В случае успеха вернёт авторизационный токен.
     post:
+      tags: [ 'auth' ]
       operationId: PostAuthLoginByCode
       requestBody:
         content:
@@ -99,6 +112,7 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес электронной почты).
       В случае успеха вернёт пустой ответ.
     post:
+      tags: [ 'auth' ]
       operationId: PostResetPassword
       requestBody:
         content:
@@ -119,6 +133,7 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес электронной почты) и код сброса пароля.
       В случае успеха вернёт пустой ответ.
     post:
+      tags: [ 'auth' ]
       operationId: PostNewPassword
       requestBody:
         content:
@@ -139,6 +154,7 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес электронной почты), старый и новый пароли.
       В случае успеха вернёт пустой ответ.
     post:
+      tags: [ 'auth' ]
       operationId: PostChangePassword
       requestBody:
         content:
@@ -159,6 +175,3 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
-security:
-  - BearerAuth: []

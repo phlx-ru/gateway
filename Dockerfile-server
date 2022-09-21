@@ -8,6 +8,7 @@ RUN make build
 FROM alpine:latest
 
 COPY --from=builder /src/bin /app
+COPY static /app/static
 
 WORKDIR /app
 

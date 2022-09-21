@@ -28,7 +28,8 @@ Vue.createApp({
             },
             request: {
                 loading: false,
-                error: ``
+                error: ``,
+                code: 0,
             },
             screens: {
                 login: 'login',
@@ -108,13 +109,27 @@ Vue.createApp({
                         max: `Код сброса не может быть длиннее 255 символов`,
                     }
                 }
-            },
-            modals: {
-                serverError: false,
+            }
+        }
+    },
+    computed: {
+        toastClasses() {
+            return {
+                'toast-warning': this.request.code >= 400 && this.request.code < 500,
+                'toast-error': this.request.code >= 500
             }
         }
     },
     methods: {
+        formClasses(property) {
+            return {
+                'has-error': this.validation.enabled && this.validation.errors[property],
+                'has-success': this.validation.enabled && !this.validation.errors[property]
+            }
+        },
+        reload() {
+            window.location.reload()
+        },
         formatTimer(timer) {
             return String(Math.floor(timer / 60)).padStart(2, '0') + ':' + String(timer % 60).padStart(2, '0')
         },
@@ -192,7 +207,6 @@ Vue.createApp({
                 .catch(error => {
                     console.error(error)
                     this.request.error = String(error)
-                    this.modals.serverError = true
                 })
         },
         async requestJSON(url, data, method = 'GET') {
@@ -211,7 +225,6 @@ Vue.createApp({
                 .catch(error => {
                     console.error(error)
                     this.request.error = String(error)
-                    this.modals.serverError = true
                 })
         },
         requestCheck(token) {
@@ -245,11 +258,19 @@ Vue.createApp({
 
             this.request.error = ``
             this.request.loading = true
-            const response = await method(form)
+            let response = await method(form)
             this.request.loading = false
 
             if (response === ``) {
                 return true // case for '204 No Content'
+            }
+
+            if (typeof response === `string` && response.startsWith(`{`)) {
+                response = JSON.parse(response)
+            }
+
+            if (response.code) {
+                this.request.code = response.code
             }
 
             if (response.code >= 400 && response.code < 500) {
@@ -262,7 +283,6 @@ Vue.createApp({
                 if (Object.keys(validation).length === 0) {
                     this.validation.enabled = false
                     this.request.error = response.message
-                    this.modals.serverError = true
                     return null
                 }
                 return null
@@ -271,7 +291,6 @@ Vue.createApp({
             if (response.code >= 500) {
                 this.validation.enabled = false
                 this.request.error = response.message
-                this.modals.serverError = true
                 return null
             }
             return response
@@ -304,7 +323,6 @@ Vue.createApp({
                 if (e && e.message) {
                     console.error(`request failed`, e)
                     this.request.error = e.message
-                    this.modals.serverError = true
                 }
                 return true
             }
@@ -339,7 +357,6 @@ Vue.createApp({
             } else {
                 localStorage.removeItem(`authToken`)
                 this.request.error = (response || {}).message || `Неизвестная ошибка. Попробуйте авторизоваться ещё раз`
-                this.modals.serverError = true
             }
         },
         async onSubmitLoginByCode() {

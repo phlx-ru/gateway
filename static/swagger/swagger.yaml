@@ -7,6 +7,13 @@ info:
 servers:
   - url: https://gateway.cargo.b-resh.ru
     description: API on staging environment
+  - url: https://gateway.services.localhost
+    description: API on local infra
+  - url: http://localhost:8000
+    description: API on local debug
+tags:
+  - name: auth
+    description: Авторизация
 paths:
   /api/1/auth/check:
     summary: >-
@@ -27,6 +34,10 @@ paths:
           example: >-
             eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzZXJ2aWNlLGF1dGgiLCJleHAiOjc5NTOxMTU3NDJ9.vNkWaAqvTUtgzVSAhJJDJ90QLpBIMlYd_8keQb1qVH8
     get:
+      tags:
+        - auth
+      security:
+        - BearerAuth: {}
       operationId: GetAuthCheck
       responses:
         '200':
@@ -146,6 +157,8 @@ paths:
       Принимает логин (он же username, он же номер телефона или адрес
       электронной почты). В случае успеха вернёт авторизационный токен.
     post:
+      tags:
+        - auth
       operationId: PostAuthLogin
       requestBody:
         content:
@@ -157,13 +170,14 @@ paths:
                 - username
                 - password
               properties:
-                username:
+                username: &ref_5
                   type: string
                   description: >-
                     Номер телефона (в произвольной форме) или адрес электронной
                     почты
                   x-oapi-codegen-extra-tags:
                     validate: required,min=3,max=255
+                    form: username
                   example:
                     - 9009009090
                     - 79009009090
@@ -171,16 +185,24 @@ paths:
                     - +7 900 900 90 90
                     - +7_[900]_900-90-90
                     - john@dohn.example
-                password:
+                password: &ref_9
                   type: string
                   description: Пароль пользователя — от 8 до 255 символов
                   x-oapi-codegen-extra-tags:
                     validate: required,min=8,max=255
                   format: password
-        required: true
+                  example: qwertyui
+                remember: &ref_6
+                  type: boolean
+                  description: >-
+                    Опция "Запомнить меня" — сохранять ли авторизационную сессию
+                    надолго
+                  x-oapi-codegen-extra-tags:
+                    validate: omitempty,boolean
+                    form: remember
       responses:
-        '200':
-          description: Ответ в случае корректно указанных логина и пароля
+        '200': &ref_7
+          description: Ответ в случае успешной аутентификации
           content:
             application/json:
               schema:
@@ -194,11 +216,156 @@ paths:
                   until: *ref_2
         '400': *ref_3
         '500': *ref_4
+  /api/1/auth/generateCode:
+    summary: Отправка одноразового кода авторизации
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес
+      электронной почты). Генерирует кратковременный одноразовый код авторизации
+      и отправляет его на телефон или почту пользователя.
+    post:
+      tags:
+        - auth
+      operationId: PostGenerateCode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - username
+              properties:
+                username: *ref_5
+      responses:
+        '204': &ref_8
+          description: Ответ в случае успеха без возвращаемых данных
+          content:
+            application/json:
+              schema:
+                description: Данные отсутствуют
+        '400': *ref_3
+        '500': *ref_4
+  /api/1/auth/loginByCode:
+    summary: Авторизация по логину и одноразовому коду
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес
+      электронной почты) и одноразовый код. В случае успеха вернёт
+      авторизационный токен.
+    post:
+      tags:
+        - auth
+      operationId: PostAuthLoginByCode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - username
+                - code
+              properties:
+                username: *ref_5
+                code:
+                  type: string
+                  description: Одноразовый код авторизации
+                  x-oapi-codegen-extra-tags:
+                    validate: required,min=3,max=255
+                  example: 8093
+                remember: *ref_6
+      responses:
+        '200': *ref_7
+        '400': *ref_3
+        '500': *ref_4
+  /api/1/auth/resetPassword:
+    summary: >-
+      Сброс пароля с отправкой хэша (или ссылки установки нового пароля)
+      уведомлением пользователю
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес
+      электронной почты). В случае успеха вернёт пустой ответ.
+    post:
+      tags:
+        - auth
+      operationId: PostResetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - username
+              properties:
+                username: *ref_5
+      responses:
+        '204': *ref_8
+        '400': *ref_3
+        '500': *ref_4
+  /api/1/auth/newPassword:
+    summary: Установка нового пароля с помощью хэшкода или ссылки сброса пароля
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес
+      электронной почты) и код сброса пароля. В случае успеха вернёт пустой
+      ответ.
+    post:
+      tags:
+        - auth
+      operationId: PostNewPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - username
+                - passwordResetHash
+                - password
+              properties:
+                username: *ref_5
+                passwordResetHash:
+                  type: string
+                  description: Код сброса пароля
+                  x-oapi-codegen-extra-tags:
+                    validate: required,min=3,max=255
+                  example: h98d64
+                password: *ref_9
+      responses:
+        '204': *ref_8
+        '400': *ref_3
+        '500': *ref_4
+  /api/1/auth/changePassword:
+    summary: Установка нового пароля с вводом старого пароля
+    description: >
+      Принимает логин (он же username, он же номер телефона или адрес
+      электронной почты), старый и новый пароли. В случае успеха вернёт пустой
+      ответ.
+    post:
+      tags:
+        - auth
+      operationId: PostChangePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - username
+                - oldPassword
+                - newPassword
+              properties:
+                username: *ref_5
+                oldPassword: *ref_9
+                newPassword: *ref_9
+      responses:
+        '204': *ref_8
+        '400': *ref_3
+        '500': *ref_4
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-security:
-  - BearerAuth: []

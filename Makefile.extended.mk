@@ -114,5 +114,4 @@ check: vendor all lint test
 .PHONY: combine
 # Generates a combined swagger.yaml TODO make it from internal /swagger handler
 combine:
-	# use: npm i -g swagger-combine
-	@swagger-combine ./api/gateway/schema.yaml -f yaml -o swagger.yaml
+	@swagger-combine ./api/gateway/schema.yaml -f yaml -o static/swagger/swagger.yaml

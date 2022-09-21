@@ -1,5 +1,5 @@
 <!doctype html>
-<html xmlns="http://www.w3.org/1999/html">
+<html xmlns="http://www.w3.org/1999/html" lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -92,11 +92,13 @@
                     </div>
 
                     <div class="card-body">
+                        <div class="toast" :class="toastClasses" v-if="request.error">
+                            <button class="btn btn-clear float-right" @click.prevent="request.error = ``"></button>
+                            <p><strong>Ошибка: </strong><span v-text="request.error"></span></p>
+                            <p class="text-right"><a href="#" @click.prevent="reload()">Попробовать ещё раз</a></p>
+                        </div>
                         <fieldset :disabled="request.loading">
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.username,
-                                'has-success': validation.enabled && !validation.errors.username
-                            }">
+                            <div class="form-group" :class="formClasses('username')">
                                 <div class="full-width">
                                     <div class="has-icon-left">
                                         <input type="text" name="username" class="form-input input-lg"
@@ -110,10 +112,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.password,
-                                'has-success': validation.enabled && !validation.errors.password
-                            }">
+                            <div class="form-group" :class="formClasses('password')">
                                 <div class="full-width">
                                     <div class="has-icon-left">
                                         <input type="password" name="password" class="form-input input-lg"
@@ -146,9 +145,9 @@
                         </div>
                         <div class="full-width">
                             <div>&nbsp;</div>
-                            <buton class="btn btn-link float-right" @click.prevent="screen = 'resetPassword'">
+                            <button class="btn btn-link float-right" @click.prevent="screen = 'resetPassword'">
                                 Не помню пароль
-                            </buton>
+                            </button>
                             <button class="btn btn-link float-right" @click.prevent="screen = 'changePassword'">
                                 Сменить пароль
                             </button>
@@ -170,12 +169,14 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="toast" :class="toastClasses" v-if="request.error">
+                        <button class="btn btn-clear float-right" @click.prevent="request.error = ``"></button>
+                        <p><strong>Ошибка: </strong><span v-text="request.error"></span></p>
+                        <p class="text-right"><a href="#" @click.prevent="reload()">Попробовать ещё раз</a></p>
+                    </div>
                     <form class="form-horizontal" @submit.prevent="onSubmitGenerateCode">
                         <fieldset :disabled="request.loading">
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.username,
-                                'has-success': validation.enabled && !validation.errors.username
-                            }">
+                            <div class="form-group" :class="formClasses('username')">
                                 <div class="full-width">
                                     <div class="has-icon-left input-group">
                                         <input type="text" name="username" class="form-input input-lg"
@@ -196,10 +197,7 @@
                     </form>
 
                     <fieldset :disabled="request.loading" v-if="loginByCode.inputCode">
-                        <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.code,
-                                'has-success': validation.enabled && !validation.errors.code
-                            }">
+                        <div class="form-group" :class="formClasses('code')">
                             <div class="full-width">
                                 <div class="has-icon-left">
                                     <input type="text" name="code" class="form-input input-lg"
@@ -246,12 +244,14 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="toast" :class="toastClasses" v-if="request.error">
+                        <button class="btn btn-clear float-right" @click.prevent="request.error = ``"></button>
+                        <p><strong>Ошибка: </strong><span v-text="request.error"></span></p>
+                        <p class="text-right"><a href="#" @click.prevent="reload()">Попробовать ещё раз</a></p>
+                    </div>
                     <form class="form-horizontal" @submit.prevent="onSubmitResetPassword">
                         <fieldset :disabled="request.loading">
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.username,
-                                'has-success': validation.enabled && !validation.errors.username
-                            }">
+                            <div class="form-group" :class="formClasses('username')">
                                 <div class="full-width">
                                     <div class="has-icon-left input-group">
                                         <input type="text" name="username" class="form-input input-lg"
@@ -272,10 +272,7 @@
                     </form>
 
                     <fieldset :disabled="request.loading" v-if="resetPassword.inputHash">
-                        <div class="form-group" :class="{
-                            'has-error': validation.enabled && validation.errors.password,
-                            'has-success': validation.enabled && !validation.errors.password
-                        }">
+                        <div class="form-group" :class="formClasses('passwordResetHash')">
                             <div class="full-width">
                                 <div class="has-icon-left">
                                     <input type="text" name="hash" class="form-input input-lg"
@@ -289,10 +286,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.password,
-                                'has-success': validation.enabled && !validation.errors.password
-                            }">
+                        <div class="form-group" :class="formClasses('password')">
                             <div class="full-width">
                                 <div class="has-icon-left">
                                     <input type="password" name="password" class="form-input input-lg"
@@ -331,12 +325,14 @@
                 </div>
 
                 <div class="card-body">
+                    <div class="toast" :class="toastClasses" v-if="request.error">
+                        <button class="btn btn-clear float-right" @click.prevent="request.error = ``"></button>
+                        <p><strong>Ошибка: </strong><span v-text="request.error"></span></p>
+                        <p class="text-right"><a href="#" @click.prevent="reload()">Попробовать ещё раз</a></p>
+                    </div>
                     <form class="form-horizontal" @submit.prevent="onSubmitChangePassword">
                         <fieldset :disabled="request.loading">
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.username,
-                                'has-success': validation.enabled && !validation.errors.username
-                            }">
+                            <div class="form-group" :class="formClasses('username')">
                                 <div class="full-width">
                                     <div class="has-icon-left input-group">
                                         <input type="text" name="username" class="form-input input-lg"
@@ -348,10 +344,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.password,
-                                'has-success': validation.enabled && !validation.errors.password
-                            }">
+                            <div class="form-group" :class="formClasses('oldPassword')">
                                 <div class="full-width">
                                     <div class="has-icon-left">
                                         <input type="password" name="oldPassword" class="form-input input-lg"
@@ -365,10 +358,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group" :class="{
-                                'has-error': validation.enabled && validation.errors.password,
-                                'has-success': validation.enabled && !validation.errors.password
-                            }">
+                            <div class="form-group" :class="formClasses('newPassword')">
                                 <div class="full-width">
                                     <div class="has-icon-left">
                                         <input type="password" name="newPassword" class="form-input input-lg"
@@ -397,32 +387,6 @@
         </div>
         <div v-else>
             <div class="loading loading-lg"></div>
-        </div>
-
-
-        <div class="modals">
-            <div class="modal modal-lg modal-server-error" :class="{active: modals.serverError}">
-                <a class="modal-overlay" href="#" aria-label="Close"></a>
-                <div class="modal-container" role="document">
-                    <div class="modal-header">
-                        <a class="btn btn-clear float-right" href="#" aria-label="Закрыть"
-                           @click="(modals.serverError = false)"></a>
-                        <div class="modal-title h5">Ошибка на сервере</div>
-                    </div>
-                    <div class="modal-body">
-                        <div class="content">
-                            <blockquote>
-                                <p class="text-error">{{ request.error }}</p>
-                                <cite>- Server</cite>
-                            </blockquote>
-                            <p>Попробуйте авторизоваться ещё раз чуть позже</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <a class="btn btn-link" href="#" @click="(modals.serverError = false)">Закрыть</a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
