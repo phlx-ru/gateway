@@ -60,6 +60,7 @@ func NewAuth(
 }
 
 type User struct {
+	ID          int64   `json:"id"`
 	Type        string  `json:"type"`
 	DisplayName string  `json:"displayName"`
 	Email       *string `json:"email,omitempty"`
@@ -120,6 +121,7 @@ func (a *Auth) Check(ctx context.Context, token string) (*CheckResult, error) {
 	}
 	return &CheckResult{
 		User: &User{
+			ID:          res.User.Id,
 			Type:        res.User.Type,
 			DisplayName: res.User.DisplayName,
 			Email:       res.User.Email,

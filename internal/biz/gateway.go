@@ -56,6 +56,7 @@ func (u *GatewayUsecase) GetAuthCheck(ctx context.Context, params gateway.GetAut
 	response := &auth.CheckResponseOK{}
 
 	if res.User != nil {
+		response.User.Id = pointer.ToInt(int(res.User.ID))
 		response.User.DisplayName = res.User.DisplayName
 		response.User.Type = res.User.Type
 		response.User.Phone = res.User.Phone
