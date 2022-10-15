@@ -37,7 +37,8 @@ paths:
       tags:
         - auth
       security:
-        - BearerAuth: {}
+        - BearerAuth:
+            - ''
       operationId: GetAuthCheck
       responses:
         '200':
@@ -59,6 +60,10 @@ paths:
                       - type
                       - displayName
                     properties:
+                      id:
+                        type: integer
+                        description: Уникальный идентификатор пользователя
+                        example: 1
                       type:
                         type: string
                         description: Тип пользователя из набора (admin|dispatcher|driver)

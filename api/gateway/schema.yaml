@@ -29,7 +29,8 @@ paths:
       - $ref: "./common/schema.yaml#/components/parameters/authTokenInQuery"
     get:
       tags: [ 'auth' ]
-      security: [ BearerAuth: { } ]
+      security:
+        - BearerAuth: [""]
       operationId: GetAuthCheck
       responses:
         '200':

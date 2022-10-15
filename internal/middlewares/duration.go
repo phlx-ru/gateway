@@ -6,11 +6,11 @@ import (
 
 	"gateway/internal/pkg/logger"
 	"gateway/internal/pkg/metrics"
-	"github.com/go-kratos/kratos/v2/transport/http"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
+	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 func Duration(metric metrics.Metrics, logs log.Logger) middleware.Middleware {

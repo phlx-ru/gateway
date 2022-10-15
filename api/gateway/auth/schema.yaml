@@ -5,7 +5,7 @@ info:
   description: >
     Компоненты для авторизации
 
-paths:
+paths: {}
 # here for schema compatibility
 
 components:
@@ -114,6 +114,11 @@ components:
         validate: "required,min=3,max=255"
       example: 8093
 
+    propertyUserId:
+      type: integer
+      description: Уникальный идентификатор пользователя
+      example: 1
+
     propertyUserType:
       type: string
       description: Тип пользователя из набора (admin|dispatcher|driver)
@@ -155,6 +160,8 @@ components:
             - type
             - displayName
           properties:
+            id:
+              $ref: "#/components/schemas/propertyUserId"
             type:
               $ref: "#/components/schemas/propertyUserType"
             displayName:

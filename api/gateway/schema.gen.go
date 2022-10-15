@@ -103,8 +103,6 @@ type MiddlewareFunc func(c *gin.Context)
 // PostChangePassword operation middleware
 func (siw *ServerInterfaceWrapper) PostChangePassword(c *gin.Context) {
 
-	c.Set(BearerAuthScopes, []string{""})
-
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 	}
@@ -143,8 +141,6 @@ func (siw *ServerInterfaceWrapper) GetAuthCheck(c *gin.Context) {
 // PostGenerateCode operation middleware
 func (siw *ServerInterfaceWrapper) PostGenerateCode(c *gin.Context) {
 
-	c.Set(BearerAuthScopes, []string{""})
-
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 	}
@@ -154,8 +150,6 @@ func (siw *ServerInterfaceWrapper) PostGenerateCode(c *gin.Context) {
 
 // PostAuthLogin operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthLogin(c *gin.Context) {
-
-	c.Set(BearerAuthScopes, []string{""})
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -167,8 +161,6 @@ func (siw *ServerInterfaceWrapper) PostAuthLogin(c *gin.Context) {
 // PostAuthLoginByCode operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthLoginByCode(c *gin.Context) {
 
-	c.Set(BearerAuthScopes, []string{""})
-
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 	}
@@ -179,8 +171,6 @@ func (siw *ServerInterfaceWrapper) PostAuthLoginByCode(c *gin.Context) {
 // PostNewPassword operation middleware
 func (siw *ServerInterfaceWrapper) PostNewPassword(c *gin.Context) {
 
-	c.Set(BearerAuthScopes, []string{""})
-
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
 	}
@@ -190,8 +180,6 @@ func (siw *ServerInterfaceWrapper) PostNewPassword(c *gin.Context) {
 
 // PostResetPassword operation middleware
 func (siw *ServerInterfaceWrapper) PostResetPassword(c *gin.Context) {
-
-	c.Set(BearerAuthScopes, []string{""})
 
 	for _, middleware := range siw.HandlerMiddlewares {
 		middleware(c)
@@ -238,28 +226,30 @@ func RegisterHandlersWithOptions(router *gin.Engine, si ServerInterface, options
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+yZTW8bNxPHvwrB5zkkwHYlp+mhusUGGrgvSZqk6CHNgZFoaRuL3JIrG2ogQC9N08B5",
-	"aVP02qDoF1Bdq9nKtvQVZr5RMeTKXtlyI8SJmgC+LZfkcDj8/zhc7j1e1vVYK6kSy0v3uJXlhomS5o1y",
-	"Tdale7UshZHmUiOpUemOK32kTV0kvMQ//vImD7h1rXkpq+UBT5oxlWtJEvNWqxXwSK1p6l+RtmyiOIm0",
-	"4iV+6doquywSuSmaTKgKo/IKOWQjasGsNBtRWbI1bdiKMFVNpqWp26trN3xVNkipULCbolqVJox0wTUp",
-	"UNsoWacmVT8GD/iGNNaPvRQuhUu8FXAdSyXiiJf4+2ExLPKAxyKpubkXRBwVlgqikdQK5ZpQVXlNWLup",
-	"TeX4XOA5tiGFfUhhD/owwC6DXRjBn/SSnYMR7DP4CwasYaVRoi4DdvgO9mEEezDANsMuDGAXBvgdVUOf",
-	"QQq7kDLoww62YYAdho+pAQyxi23XiHr/zWAMI3yAXdw6HzDsYBf62MYtqkn9CNu+NKYKGJHZkMEzhh3Y",
-	"xR4+ILcZ9rADYxjgfRp7m3yCffyJpjOmOuz6wUbYdbXd8CtFMdM2oaDoWBpBIVmt8BK/pm2yMh24gBv5",
-	"TUPaZFlXmtSjrFUiless4ng9Krvuha8thfWeF5egp/8bucZLPPTr4d+HTVFf/1/hUMXZe3tkva7nxmw5",
-	"RRppY62sF/mF4sX5RzjoefB0Ra9kk2gF/GKxOGWrrOt1reawJo3RZllMfCVbH5zK1qpKSGrrHkHbqNeF",
-	"aZJUf/fq8JqAIS20fyS5jnICwacMO6QCqtohjR4Ia0Zb8ngaGVm+O4OUZzCCF7CNbejjwwkrO86ffdwi",
-	"DXadvHv4EAZ+lD5sk/AcYi+cq/1M95kT5MCjSZVnCJ864ecNzzbXx+8hzYGEHcIMO5A6QH4hPjyBQ+xC",
-	"CtsT4OY3QwEeYDegqY1mY+UdzHnrwarKGVxdlgntyCsuwMe0XHwVLbvFup4Vr37yupV8sbh0CltfKJqF",
-	"NtG3suKsXfjwFNZuav2ZUM3MO/u6QYuFEXWZSGN56db8Ng+7uSW7qe9Ktao+b0jT5K3bU/w+d3KnHXvg",
-	"Es4UMSnez8mICuOTEXnCvLDn1XHA6NnjQOmm4zLRDuzjU8ItT0j/6HZQlYo0LFd0Rb7l+TNk8LOLLWGa",
-	"Yht73qGh27O6MHTJtA0DGjTjlXIiRcLFse/j7F9T653ZUU5d/CmXjl2vbdq2/FjZVkVTmJ7TwYwm/vZO",
-	"3ABflpsv55dkUZk5r4OzvJzn+tecDlxWPiaoScJzkqIWM0V1lLx1XY3U24/c/CfREzcsB5w7og4JzJfp",
-	"n5Lopy44ixK/W4qXqv6VMnhm+k1l8Dek+R+PLyVlEpezDsRIW1yaP2s+mSnx5eY7kFv8jv8vmeK/JSGL",
-	"4UJ58GOeUfFqVMxKEntU59SEvaOoKLn5jlxjuOn50xN24A9qhh2ylfvoXMANxpVcwBbFRW6Rzs5Ip7m7",
-	"GDtJjvAhPsInDO/jY/zh8PjkRUlfN7gFuzB0hROUdpQjI61M3hGSFkDJ9alwLIqTqUU4IyVPym8THR+H",
-	"YjT1oeE+8j0YfXZuJhO9I9SlJ1N3nmGPFOPvC50w3R0F7J14CcGd59m/B3dpkv/rcOu2u/6QZmNypXL8",
-	"L4JWzCaiGqkqk2ojMlrVaaEC3jDr2T8CWyoUsh8BYVmYqg7vvGekrYWmwVu3W/8EAAD//x4jcukLGQAA",
+	"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",
+	"AQAA//8Jz6i4UBoAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

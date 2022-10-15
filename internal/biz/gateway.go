@@ -3,13 +3,14 @@ package biz
 import (
 	"context"
 
+	"github.com/AlekSi/pointer"
+
 	"gateway/api/gateway"
 	"gateway/api/gateway/auth"
 	"gateway/internal/clients"
 	"gateway/internal/pkg/logger"
 	"gateway/internal/pkg/metrics"
 	"gateway/internal/pkg/request"
-	"github.com/AlekSi/pointer"
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
@@ -29,7 +30,7 @@ func NewGatewayUsecase(
 	return &GatewayUsecase{
 		authClient: authClient,
 		metric:     metric,
-		logger:     logger.NewHelper(logs, "ts", log.DefaultTimestamp, "scope", "service/gateway"),
+		logger:     logger.NewHelper(logs, "ts", log.DefaultTimestamp, "scope", "biz/gateway"),
 	}
 }
 
